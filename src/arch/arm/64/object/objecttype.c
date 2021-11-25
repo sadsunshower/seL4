@@ -9,6 +9,7 @@
 #include <api/failures.h>
 #include <kernel/vspace.h>
 #include <object/structures.h>
+#include <arch/kernel/smc.h>
 #include <arch/machine.h>
 #include <arch/model/statedata.h>
 #include <arch/object/objecttype.h>
@@ -106,6 +107,12 @@ deriveCap_ret_t Arch_deriveCap(cte_t *slot, cap_t cap)
     case cap_sid_cap:
     case cap_cb_cap:
         ret.cap = cap;
+        ret.status = EXCEPTION_NONE;
+        return ret;
+#endif
+#ifdef CONFIG_ARM_SMC_SUPPORT
+    case cap_smc_cap:
+        ret.cap = cap_null_cap_new();
         ret.status = EXCEPTION_NONE;
         return ret;
 #endif
@@ -325,6 +332,13 @@ bool_t CONST Arch_sameRegionAs(cap_t cap_a, cap_t cap_b)
         }
         break;
 #endif
+#ifdef CONFIG_ARM_SMC_SUPPORT
+    case cap_smc_cap:
+        if (cap_get_capType(cap_b) == cap_smc_cap) {
+            return true;
+        }
+        break;
+#endif
     }
     return false;
 }
@@ -479,7 +493,7 @@ exception_t Arch_decodeInvocation(word_t label, word_t length, cptr_t cptr,
     /* The C parser cannot handle a switch statement with only a default
      * case. So we need to do some gymnastics to remove the switch if
      * there are no other cases */
-#if defined(CONFIG_ARM_HYPERVISOR_SUPPORT) || defined(CONFIG_ARM_SMMU)
+#if defined(CONFIG_ARM_HYPERVISOR_SUPPORT) || defined(CONFIG_ARM_SMMU) || defined(CONFIG_ARM_SMC_SUPPORT)
     switch (cap_get_capType(cap)) {
 #ifdef CONFIG_ARM_HYPERVISOR_SUPPORT
     case cap_vcpu_cap:
@@ -495,6 +509,10 @@ exception_t Arch_decodeInvocation(word_t label, word_t length, cptr_t cptr,
     case cap_cb_cap:
         return decodeARMCBInvocation(label, length, cptr, slot, cap, call, buffer);
 #endif /*CONFIG_ARM_SMMU*/
+#ifdef CONFIG_ARM_SMC_SUPPORT
+    case cap_smc_cap:
+        return decodeARMSMCInvocation(label, length, cptr, slot, cap, buffer);
+#endif
     default:
 #else
 {

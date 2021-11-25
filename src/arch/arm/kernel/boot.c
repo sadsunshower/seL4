@@ -421,6 +421,11 @@ static BOOT_CODE bool_t try_init_kernel(
         return false;
     }
 
+    #ifdef CONFIG_ARM_SMC_SUPPORT
+    cap_t smc_cap = cap_smc_cap_new();
+    write_slot(SLOT_PTR(pptr_of_cap(root_cnode_cap), seL4_CapSMC), smc_cap);
+    #endif
+
     /* create the cap for managing thread domains */
     create_domain_cap(root_cnode_cap);
 

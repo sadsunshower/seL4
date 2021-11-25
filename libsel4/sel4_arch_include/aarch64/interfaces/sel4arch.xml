@@ -44,6 +44,16 @@
         <member name="tpidr_el0"/>
         <member name="tpidrro_el0"/>
     </struct>
+    <struct name="seL4_ARM_SMCRegisters" condition="defined CONFIG_ARM_SMC_SUPPORT">
+        <member name="x0"/>
+        <member name="x1"/>
+        <member name="x2"/>
+        <member name="x3"/>
+        <member name="x4"/>
+        <member name="x5"/>
+        <member name="x6"/>
+        <member name="x7"/>
+    </struct>
     <interface name="seL4_ARM_VSpace" manual_name="Page Global Directory"
         cap_description="Capability to the top level translation table being operated on.">
         <method id="ARMVSpaceClean_Data" name="Clean_Data" manual_label="vspace_clean"
@@ -342,6 +352,28 @@
             <error name="seL4_RevokeFirst">
                 <description>
                     A copy of the <texttt text="_service"/> capability exists.
+                </description>
+            </error>
+        </method>
+    </interface>
+    <interface name="seL4_ARM_SMC" manual_name="SMC"
+        cap_description="Capability which enables threads to make SMC calls."
+        condition="defined CONFIG_ARM_SMC_SUPPORT">
+        <method id="ARMSMC" name="SMC"
+            condition="defined CONFIG_ARM_SMC_SUPPORT">
+                <brief>
+                    Make an SMC call.
+                </brief>
+                <description>
+                    Make an SMC call with the given registers
+                </description>
+            <param dir="in" name="in_reg" type="seL4_ARM_SMCRegisters"
+            description="A pointer to a register structure which contains the input registers."/>
+            <param dir="out" name="out_reg" type="seL4_ARM_SMCRegisters"
+            description="A pointer to a register structure which will contain the output registers."/>
+            <error name="seL4_InvalidCapability">
+                <description>
+                    The <texttt text="_service"/> is a CPtr to a capability of the wrong type.
                 </description>
             </error>
         </method>

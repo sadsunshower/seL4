@@ -17,7 +17,8 @@ add_sources(
         model/statedata.c
         c_traps.c
         idle.c
+        kernel/smc.c
         kernel/thread.c
         kernel/vspace.c
-    ASMFILES head.S traps.S
+    ASMFILES head.S traps.S kernel/smc.S
 )

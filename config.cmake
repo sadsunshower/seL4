@@ -529,5 +529,10 @@ config_option(
      of __builtin_ctzl and __builtin_ctzll."
     DEFAULT OFF
 )
+config_option(
+    KernelSMCSupport ARM_SMC_SUPPORT
+    "Adds SMC support on ARM"
+    DEFAULT OFF
+)
 
 add_config_library(kernel "${configure_string}")
